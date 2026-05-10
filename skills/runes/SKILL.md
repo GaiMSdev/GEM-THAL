@@ -16,3 +16,7 @@ When user invokes /runes, manage compression mode.
 Use the shared core logic to read/write flags.
 
 For full documentation: /runes-help
+
+## Related skills
+
+- `/runes-commit` → generate a Conventional Commits message from staged diff.
