@@ -10,13 +10,17 @@ const SKIP = new Set(["background-processes", "bin"]);
 
 // Search ALL project dirs for the most recently modified session-*.jsonl
 function getLatestSession() {
+  if (!fs.existsSync(TMP_DIR)) return null;
   let best = null;
   let bestMtime = 0;
   try {
     for (const dir of fs.readdirSync(TMP_DIR)) {
       if (SKIP.has(dir)) continue;
-      const chatsDir = path.join(TMP_DIR, dir, "chats");
+      const fullPath = path.join(TMP_DIR, dir);
       try {
+        if (!fs.statSync(fullPath).isDirectory()) continue;
+        const chatsDir = path.join(fullPath, "chats");
+        if (!fs.existsSync(chatsDir)) continue;
         for (const file of fs.readdirSync(chatsDir)) {
           if (!file.startsWith("session-") || !file.endsWith(".jsonl")) continue;
           const fp = path.join(chatsDir, file);
@@ -33,17 +37,19 @@ function parseSession(filePath) {
   const acc = { cached: 0, input: 0, output: 0, thoughts: 0, tool: 0, total: 0 };
   let model = "unknown";
   try {
-    for (const line of fs.readFileSync(filePath, "utf8").trim().split("\n")) {
+    const content = fs.readFileSync(filePath, "utf8").trim();
+    if (!content) return { ...acc, model };
+    for (const line of content.split("\n")) {
       try {
         const entry = JSON.parse(line);
         if (!entry.tokens) continue;
         const t = entry.tokens;
-        acc.cached   += t.cached   || 0;
-        acc.input    += t.input    || 0;
-        acc.output   += t.output   || 0;
+        acc.cached   += t.cached_tokens || t.cached || 0;
+        acc.input    += t.input_tokens  || t.input  || 0;
+        acc.output   += t.output_tokens || t.output || 0;
         acc.thoughts += t.thoughts || 0;
-        acc.tool     += t.tool     || 0;
-        acc.total    += t.total    || 0;
+        acc.tool     += t.tool_tokens   || t.tool   || 0;
+        acc.total    += t.total_tokens  || t.total  || 0;
         if (entry.model) model = entry.model;
       } catch (e) {}
     }
@@ -59,7 +65,9 @@ const mode = readFlag() || "off";
 
 const COMPRESSION = { lite: 0.30, full: 0.75, ultra: 0.87 };
 const ratio = COMPRESSION[mode] || 0;
-const estSaved = Math.round(stats.output * (ratio / (1 - ratio)));
+const estSaved = (ratio > 0 && stats.output > 0) 
+  ? Math.round(stats.output * (ratio / (1 - ratio)))
+  : 0;
 
 console.log("GEM-THAL PRECISION STATS");
 console.log("------------------------");
@@ -70,8 +78,8 @@ if (stats.thoughts > 0) console.log("Thoughts:   " + stats.thoughts.toLocaleStri
 if (stats.tool > 0)     console.log("Tool:       " + stats.tool.toLocaleString()      + " tokens");
 console.log("Input:      " + stats.input.toLocaleString()  + " tokens");
 console.log("Output:     " + stats.output.toLocaleString() + " tokens");
-if (stats.total > 0)    console.log("Total:      " + stats.total.toLocaleString()     + " tokens");
-if (ratio > 0) {
+if (stats.total > 0)    console.log("Total:      " + (stats.input + stats.output).toLocaleString() + " tokens");
+if (estSaved > 0) {
   console.log("Est. Saved: " + estSaved.toLocaleString() + " tokens (" + Math.round(ratio * 100) + "% from compression)");
   console.log("Total Val:  " + (stats.output + estSaved).toLocaleString() + " tokens equivalent");
 }
