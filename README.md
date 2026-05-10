@@ -1,34 +1,68 @@
-# RUNES — Industry-Leading Token Compression
+# GEM-THAL
 
-Industry-leading semantic compression for Gemini CLI, Claude Code, and OpenCode. Surpasses standard linguistic stripping (like Caveman) by using MetaGlyphs and semantic structuring.
+High-signal compression for Gemini CLI.
 
-## Hybrid Architecture
-One shared core, isolated environments. RUNES automatically detects your CLI and maintains separate state flags:
-- **Gemini CLI:** `~/.gemini/.compress-active`
-- **OpenCode:** `~/.config/opencode/.runes-active`
-- **Claude Code:** `~/.claude/.caveman-active`
+GEM-THAL is a Gemini CLI extension that injects compression rules into every model turn via hooks. Activate once — mode persists in a flag file at `~/.gemini/.compress-active` until you say "normal mode". Three levels of semantic compression, from light filler-removal to MetaGlyph data packets.
 
 ## Modes
 
-| Mode | Effect | Compression |
-|------|--------|-------------|
-| `lite` | Drop filler. Keep detail. | ~35% |
+| Mode | Description | Compression |
+|------|-------------|-------------|
+| `lite` | Drop filler. Keep all detail. | ~35% |
 | `full` | Drop articles. Fragments OK. | ~75% |
-| `ultra` | MetaGlyphs (⌬, ⑂, →). Data Packets. | **~88%** |
+| `ultra` | MetaGlyphs + `<R>Key:Value</R>` data packets. | ~88% |
 
-## Smart Status & Auto-Fix
-- 🟢 **Green:** System functional. Active in LITE, FULL, or ULTRA.
-- 🟡 **Yellow:** Warning. Detected sensitive task. AI will mitigate (suggest LITE).
-- 🔴 **Red:** Broken. AI will autonomously attempt self-healing.
+## MetaGlyphs (ultra mode)
 
-## Commands
+Ultra mode uses a fixed symbol vocabulary to replace verbose constructs:
+
+| Symbol | Meaning |
+|--------|---------|
+| `⌬` | module |
+| `⑂` | branch / fork |
+| `⨕` | transform |
+| `→` | causality / leads to |
+| `∴` | therefore |
+| `∵` | because |
+| `®` | requirement |
+| `⚙` | implementation |
+| `[!]` | error |
+| `[✓]` | success |
+
+## Skills
+
+| Skill | Trigger | Description |
+|-------|---------|-------------|
+| `runes` | `/runes [lite\|full\|ultra]` | Activate, switch, or deactivate compression mode. |
+| `runes-commit` | `/runes-commit` | Generate a Conventional Commits message from staged diff. No noise — subject + optional "why" body only. |
+| `runes-review` | `/runes-review` | Review staged diff. One finding per line, severity-tagged (`CRITICAL` / `WARN` / `NOTE`). Max 10. No praise. |
+| `runes-stats` | `/runes-stats` | Show real token usage and estimated savings for the session. |
+
+## Installation
+
 ```bash
-activate runes [lite|full|ultra]
-switch to runes [mode]
-normal mode (deactivate)
-/runes-stats (show savings)
-/runes-help (show documentation)
+git clone https://github.com/raakanin/gem-thal ~/.gemini/extensions/gem-thal
 ```
 
-## Attribution
-Inspired by [caveman](https://github.com/JuliusBrussee/caveman) by Julius Brussee.
+Gemini CLI loads extensions from `~/.gemini/extensions/` automatically.
+
+## Commands
+
+```
+/runes              # toggle full mode on/off
+/runes lite         # activate lite mode
+/runes full         # activate full mode
+/runes ultra        # activate ultra mode
+/runes-commit       # generate commit message from staged diff
+/runes-review       # review staged diff
+/runes-stats        # show token savings
+normal mode         # deactivate compression
+```
+
+## Auto-safety
+
+Code blocks, commit messages, and PR descriptions are always written normally (0% compression). Technical terms and API names are never abbreviated. Security warnings and data-loss operations always use full prose regardless of active mode.
+
+## Inspired by
+
+[caveman](https://github.com/JuliusBrussee/caveman) by Julius Brussee.
