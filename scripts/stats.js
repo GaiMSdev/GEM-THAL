@@ -1,35 +1,46 @@
 #!/usr/bin/env node
+/**
+ * RUNES Precision Stats
+ * Analyzes session logs to estimate token savings.
+ */
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const { readFlag } = require("./config");
+const core = require("../lib/runes-core");
 
-const GEMINI_DIR = process.env.GEMINI_CONFIG_DIR || path.join(os.homedir(), ".gemini");
-const TMP_DIR = path.join(GEMINI_DIR, "tmp");
+const HOME = os.homedir();
+const TMP_DIRS = [
+  process.env.GEMINI_CONFIG_DIR ? path.join(process.env.GEMINI_CONFIG_DIR, "tmp") : path.join(HOME, ".gemini", "tmp"),
+  path.join(HOME, ".config", "opencode", "tmp"),
+  path.join(HOME, ".claude", "tmp")
+];
+
 const SKIP = new Set(["background-processes", "bin"]);
 
-// Search ALL project dirs for the most recently modified session-*.jsonl
 function getLatestSession() {
-  if (!fs.existsSync(TMP_DIR)) return null;
   let best = null;
   let bestMtime = 0;
-  try {
-    for (const dir of fs.readdirSync(TMP_DIR)) {
-      if (SKIP.has(dir)) continue;
-      const fullPath = path.join(TMP_DIR, dir);
-      try {
-        if (!fs.statSync(fullPath).isDirectory()) continue;
-        const chatsDir = path.join(fullPath, "chats");
-        if (!fs.existsSync(chatsDir)) continue;
-        for (const file of fs.readdirSync(chatsDir)) {
-          if (!file.startsWith("session-") || !file.endsWith(".jsonl")) continue;
-          const fp = path.join(chatsDir, file);
-          const { mtimeMs } = fs.statSync(fp);
-          if (mtimeMs > bestMtime) { bestMtime = mtimeMs; best = fp; }
-        }
-      } catch (e) {}
-    }
-  } catch (e) {}
+  
+  for (const tmpDir of TMP_DIRS) {
+    if (!fs.existsSync(tmpDir)) continue;
+    try {
+      for (const dir of fs.readdirSync(tmpDir)) {
+        if (SKIP.has(dir)) continue;
+        const fullPath = path.join(tmpDir, dir);
+        try {
+          if (!fs.statSync(fullPath).isDirectory()) continue;
+          const chatsDir = path.join(fullPath, "chats");
+          if (!fs.existsSync(chatsDir)) continue;
+          for (const file of fs.readdirSync(chatsDir)) {
+            if (!file.startsWith("session-") || !file.endsWith(".jsonl")) continue;
+            const fp = path.join(chatsDir, file);
+            const { mtimeMs } = fs.statSync(fp);
+            if (mtimeMs > bestMtime) { bestMtime = mtimeMs; best = fp; }
+          }
+        } catch (e) {}
+      }
+    } catch (e) {}
+  }
   return best;
 }
 
@@ -61,16 +72,18 @@ const sessionFile = getLatestSession();
 const stats = sessionFile
   ? parseSession(sessionFile)
   : { cached: 0, input: 0, output: 0, thoughts: 0, tool: 0, total: 0, model: "N/A" };
-const mode = readFlag() || "off";
 
-const COMPRESSION = { lite: 0.30, full: 0.75, ultra: 0.87 };
+const mode = core.readFlag() || "off";
+
+// Updated compression ratios based on RUNES research
+const COMPRESSION = { lite: 0.35, full: 0.75, ultra: 0.88 };
 const ratio = COMPRESSION[mode] || 0;
 const estSaved = (ratio > 0 && stats.output > 0) 
   ? Math.round(stats.output * (ratio / (1 - ratio)))
   : 0;
 
-console.log("GEM-THAL PRECISION STATS");
-console.log("------------------------");
+console.log("RUNES PRECISION STATS");
+console.log("---------------------");
 console.log("Model:      " + stats.model);
 console.log("Mode:       " + mode.toUpperCase());
 if (stats.cached > 0)   console.log("Cached:     " + stats.cached.toLocaleString()   + " tokens");

@@ -1,56 +1,63 @@
 #!/usr/bin/env node
-const { readFlag, writeFlag, removeFlag } = require("./config");
+/**
+ * RUNES — High-signal compression for Gemini CLI
+ * This hook runs before every model call (BeforeAgent).
+ */
+const path = require("path");
+// Dynamically resolve core path to ensure compatibility with all CLIs
+const core = require("../lib/runes-core");
 
 let input = "";
 process.stdin.on("data", c => { input += c; });
 process.stdin.on("end", () => {
-  let statusCircle = "🟢"; // Default: Success
   let errorMsg = "";
 
   let parsed = {};
   try { 
     if (input) parsed = JSON.parse(input); 
   } catch (e) {
-    statusCircle = "🔴";
     errorMsg = " [JSON_ERR]";
   }
   
   const prompt = (parsed.prompt || '').trim().toLowerCase();
+  const mode = core.readFlag() || "off";
 
-  // Deactivate logic
-  const deactivate = /\b(stop|disable|deactivate|turn off)\b.*\bcompress\b/i.test(prompt) || /\bnormal mode\b/i.test(prompt);
+  // Mode change detection
+  const activateMatch = prompt.match(/\b(activate|enable|turn on|start|switch to)\b.*\b(compress|runes)\s*(lite|full|ultra|wenyan)?\b/i) ||
+                        prompt.match(/\b(compress|runes)\s*(lite|full|ultra|wenyan)?\b.*\b(on|activate|enable)\b/i) ||
+                        prompt.match(/\b(lite|full|ultra|wenyan)\b.*\b(compress|runes)\b.*\bmode\b/i);
+  
+  const deactivate = /\b(stop|disable|deactivate|turn off)\b.*\b(compress|runes)\b/i.test(prompt) || /\bnormal mode\b/i.test(prompt);
+
   if (deactivate) {
-    removeFlag();
-    process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [GEM-THAL: OFF]" }));
+    core.removeFlag();
+    process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [RUNES: OFF]" }));
     process.exit(0);
   }
 
-  // Mode activation logic
-  const activateMatch = prompt.match(/\b(activate|enable|turn on|start|switch to)\b.*\bcompress\s*(lite|full|ultra)?\b/i) ||
-                        prompt.match(/\bcompress\s*(lite|full|ultra)?\b.*\b(on|activate|enable)\b/i) ||
-                        prompt.match(/\b(lite|full|ultra)\b.*\bcompress\b.*\bmode\b/i);
   if (activateMatch) {
-    let mode = activateMatch[2] || activateMatch[1] || "full";
-    if (!["lite", "full", "ultra"].includes(mode)) mode = "full";
-    writeFlag(mode);
+    let newMode = activateMatch[3] || activateMatch[2] || "full";
+    if (!core.VALID_MODES.includes(newMode)) newMode = "full";
+    core.writeFlag(newMode);
+    // Continue with the newly set mode
   }
 
-  const mode = readFlag();
-  if (!mode || mode === "off") process.exit(0);
+  const activeMode = core.readFlag() || "off";
+  if (activeMode === "off") process.exit(0);
 
-  let reinforcement = "";
-  if (mode === "lite") {
-    reinforcement = "COMPRESS LITE: Drop filler/hedging. Keep articles + full sentences. Professional-tight.";
-  } else if (mode === "ultra") {
-    reinforcement = "COMPRESS ULTRA: MetaGlyph allowed (∈ → ∀ ∃ ∴). Abbreviate prose (DB/fn/req/res/impl/ctx/err). Strip conjunctions. Arrows for causality. Chain-of-Draft: reason silently, then answer.";
-  } else {
-    reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
-  }
+  // Smart Context Detection
+  const context = {
+    isSensitive: /\b(delete|rm -rf|password|secret|security|auth|private|remove|wipe)\b/i.test(prompt),
+    isComplex: /\b(refactor|architect|design|fix bug|analyze)\b/i.test(prompt)
+  };
 
-  const statusLine = statusCircle + " [GEM-THAL:" + mode.toUpperCase() + errorMsg + "]";
-  
+  const statusLine = core.getStatusLine(activeMode, errorMsg, context);
+  const reinforcement = core.getPromptInstructions(activeMode);
+
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
-    hookSpecificOutput: { additionalContext: reinforcement + " Deactivate: \"normal mode\"." }
+    hookSpecificOutput: { 
+      additionalContext: reinforcement + " Deactivate: \"normal mode\"."
+    }
   }));
 });

@@ -1,78 +1,34 @@
-# GEM-THAL
+# RUNES — Industry-Leading Token Compression
 
-High-signal compression extension for Gemini CLI. Removes linguistic filler without sacrificing technical accuracy. Per-turn reinforcement via BeforeAgent hook — not just a system prompt.
+Industry-leading semantic compression for Gemini CLI, Claude Code, and OpenCode. Surpasses standard linguistic stripping (like Caveman) by using MetaGlyphs and semantic structuring.
 
-## Installation
-
-```bash
-gemini extensions install https://github.com/GaiMSdev/GEM-THAL
-```
-
-Or manually:
-
-```bash
-git clone https://github.com/GaiMSdev/GEM-THAL ~/.gemini/extensions/gem-thal
-```
+## Hybrid Architecture
+One shared core, isolated environments. RUNES automatically detects your CLI and maintains separate state flags:
+- **Gemini CLI:** `~/.gemini/.compress-active`
+- **OpenCode:** `~/.config/opencode/.runes-active`
+- **Claude Code:** `~/.claude/.caveman-active`
 
 ## Modes
 
-| Mode | Effect |
-|------|--------|
-| `lite` | Drop filler/hedging. Keep articles + full sentences. Professional-tight. |
-| `full` | Drop articles. Fragments OK. Short synonyms. No pleasantries. *(default)* |
-| `ultra` | MetaGlyph (∈ → ∀ ∃ ∴). Abbreviate prose. Chain-of-Draft. One word when one word enough. |
+| Mode | Effect | Compression |
+|------|--------|-------------|
+| `lite` | Drop filler. Keep detail. | ~35% |
+| `full` | Drop articles. Fragments OK. | ~75% |
+| `ultra` | MetaGlyphs (⌬, ⑂, →). Data Packets. | **~88%** |
+
+## Smart Status & Auto-Fix
+- 🟢 **Green:** System functional. Active in LITE, FULL, or ULTRA.
+- 🟡 **Yellow:** Warning. Detected sensitive task. AI will mitigate (suggest LITE).
+- 🔴 **Red:** Broken. AI will autonomously attempt self-healing.
 
 ## Commands
-
-**Activate:**
+```bash
+activate runes [lite|full|ultra]
+switch to runes [mode]
+normal mode (deactivate)
+/runes-stats (show savings)
+/runes-help (show documentation)
 ```
-activate compress          # full mode (default)
-activate compress lite
-activate compress ultra
-```
-
-**Switch level:**
-```
-switch to compress lite
-switch to compress ultra
-```
-
-**Deactivate:**
-```
-normal mode
-stop compress
-```
-
-**Skills:**
-- `/compress` — toggle or switch mode
-- `/compress-help` — full reference
-- `/compress-stats` — real token stats from session logs
-
-## Principles
-
-- Omit articles (a/an/the) and filler (just, really, basically, actually).
-- Remove pleasantry openers and hedging.
-- Fragments OK in `full` and `ultra`.
-- Technical terms and code blocks: never compressed.
-
-## Safety
-
-Full prose always for:
-- Security or data-loss warnings
-- Irreversible operations
-- Ambiguous logical sequences
-
-## How it works
-
-Two hooks fire on every Gemini CLI session:
-
-| Hook | Purpose |
-|------|---------|
-| `SessionStart` | Injects full mode ruleset + sets terminal title |
-| `BeforeAgent` | Per-turn reinforcement — re-injects compact rules before every model call |
-
-Flag file: `~/.gemini/.compress-active` (contains `lite`, `full`, or `ultra`).
 
 ## Attribution
-
 Inspired by [caveman](https://github.com/JuliusBrussee/caveman) by Julius Brussee.

@@ -1,0 +1,30 @@
+{
+  "name": "opencode-runes",
+  "version": "2.0.0",
+  "description": "Industry-leading token compression for Gemini, Claude, and OpenCode.",
+  "main": "lib/runes-core.js",
+  "scripts": {
+    "stats": "node scripts/stats.js"
+  },
+  "keywords": [
+    "compression",
+    "tokens",
+    "gemini",
+    "claude",
+    "opencode",
+    "caveman"
+  ],
+  "author": "GaiMSdev",
+  "license": "MIT",
+  "gemini": {
+    "hooks": {
+      "BeforeAgent": "scripts/before-agent.js",
+      "SessionStart": "scripts/session-start.js"
+    }
+  },
+  "claudecode": {
+    "hooks": {
+      "experimental.chat.system.transform": "lib/claude-transform.js"
+    }
+  }
+}
