@@ -5,15 +5,23 @@ const { execSync } = require("child_process");
 let input = "";
 process.stdin.on("data", c => { input += c; });
 process.stdin.on("end", () => {
+  let statusCircle = "🟢"; // Default: Success
+  let errorMsg = "";
+
   let parsed = {};
-  try { parsed = JSON.parse(input); } catch (e) {}
+  try { 
+    if (input) parsed = JSON.parse(input); 
+  } catch (e) {
+    statusCircle = "🔴";
+    errorMsg = " [JSON_ERR]";
+  }
+  
   const prompt = (parsed.prompt || '').trim().toLowerCase();
 
   // Deactivate logic
   const deactivate = /\b(stop|disable|deactivate|turn off)\b.*\bcompress\b/i.test(prompt) || /\bnormal mode\b/i.test(prompt);
   if (deactivate) {
     removeFlag();
-    // Silent Maestri update
     try { execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: OFF"', { shell: true, stdio: 'ignore' }); } catch (e) {}
     process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [GEM-THAL: OFF]" }));
     process.exit(0);
@@ -32,8 +40,13 @@ process.stdin.on("end", () => {
   const mode = readFlag();
   if (!mode || mode === "off") process.exit(0);
 
-  // Silent Maestri update
-  try { execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: ' + mode.toUpperCase() + '"', { shell: true, stdio: 'ignore' }); } catch (e) {}
+  // Health check: Maestri CLI
+  try { 
+    execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: ' + mode.toUpperCase() + '"', { shell: true, stdio: 'ignore' }); 
+  } catch (e) {
+    statusCircle = "🟡"; // Warning: Operational but Maestri failed
+    errorMsg = " [NO_MAESTRI]";
+  }
 
   let reinforcement = "";
   if (mode === "lite") {
@@ -44,8 +57,7 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  // Back to orange circle (🟠) for high-visibility
-  const statusLine = "🟠 [GEM-THAL:" + mode.toUpperCase() + "]";
+  const statusLine = statusCircle + " [GEM-THAL:" + mode.toUpperCase() + errorMsg + "]";
   
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
