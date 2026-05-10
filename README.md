@@ -11,7 +11,7 @@ gemini extensions install https://github.com/GaiMSdev/GEM-THAL
 Or manually:
 
 ```bash
-git clone https://github.com/GaiMSdev/GEM-THAL ~/.gemini/extensions/gemini-compress
+git clone https://github.com/GaiMSdev/GEM-THAL ~/.gemini/extensions/gem-thal
 ```
 
 ## Usage
