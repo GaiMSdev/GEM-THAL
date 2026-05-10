@@ -15,7 +15,7 @@ process.stdin.on("end", () => {
     removeFlag();
     // Silent Maestri update
     try { execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: OFF"', { shell: true, stdio: 'ignore' }); } catch (e) {}
-    process.stdout.write(JSON.stringify({ systemMessage: "\x1b]0;\x07" }));
+    process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [GEM-THAL: OFF]" }));
     process.exit(0);
   }
 
@@ -44,9 +44,11 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  const title = "\x1b]0;[GEM-THAL:" + mode.toUpperCase() + "]\x07";
+  // Pure text + emoji for clean look (CLI friendly)
+  const statusLine = "🟠 [GEM-THAL:" + mode.toUpperCase() + "]";
+  
   process.stdout.write(JSON.stringify({
-    systemMessage: title,
+    systemMessage: statusLine,
     hookSpecificOutput: { additionalContext: reinforcement + " Deactivate: \"normal mode\"." }
   }));
 });
