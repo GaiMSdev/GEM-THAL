@@ -65,7 +65,7 @@ High-signal response compression for Gemini CLI. Removes filler without sacrific
 | File | Purpose |
 |------|---------|
 | `~/.gemini/.compress-active` | Flag file — contains `lite`, `full`, or `ultra` |
-| `~/.gemini/extensions/gemini-compress/` | Extension root |
+| `~/.gemini/extensions/gem-thal/` | Extension root |
 
 ### Attribution
 
