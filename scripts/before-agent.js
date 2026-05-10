@@ -53,10 +53,10 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  // Small caps conversion
+  // Symbol: 🟣 (Lilla sirkel) + ✨ (Gnist)
   const tag = toSmallCaps("GEM-THAL");
   const modeLabel = toSmallCaps(mode);
-  const statusLine = "💠⚡️ [" + tag + ":" + modeLabel + "]";
+  const statusLine = "🟣✨ [" + tag + ":" + modeLabel + "]";
   
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
