@@ -44,8 +44,8 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  // Status Line: Reverting small caps, using purple emojis (🟣✨💜)
-  const statusLine = "🟣✨💜 [GEM-THAL:" + mode.toUpperCase() + "]";
+  // Back to orange circle (🟠) for high-visibility
+  const statusLine = "🟠 [GEM-THAL:" + mode.toUpperCase() + "]";
   
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
