@@ -4,14 +4,15 @@ High-signal compression extension for Gemini CLI. Increases information density 
 
 ## Installation
 
-1. Create extension directory:
-   ```bash
-   mkdir -p ~/.gemini/extensions/gemini-compress
-   ```
+```bash
+gemini extensions install https://github.com/GaiMSdev/GEM-THAL
+```
 
-2. Copy files to directory.
+Or manually:
 
-3. Restart Gemini CLI.
+```bash
+git clone https://github.com/GaiMSdev/GEM-THAL ~/.gemini/extensions/gemini-compress
+```
 
 ## Usage
 
