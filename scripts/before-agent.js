@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 const { readFlag, writeFlag, removeFlag } = require("./config");
-const { execSync } = require("child_process");
 
 let input = "";
 process.stdin.on("data", c => { input += c; });
@@ -22,7 +21,6 @@ process.stdin.on("end", () => {
   const deactivate = /\b(stop|disable|deactivate|turn off)\b.*\bcompress\b/i.test(prompt) || /\bnormal mode\b/i.test(prompt);
   if (deactivate) {
     removeFlag();
-    try { execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: OFF"', { shell: true, stdio: 'ignore' }); } catch (e) {}
     process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [GEM-THAL: OFF]" }));
     process.exit(0);
   }
@@ -39,14 +37,6 @@ process.stdin.on("end", () => {
 
   const mode = readFlag();
   if (!mode || mode === "off") process.exit(0);
-
-  // Health check: Maestri CLI
-  try { 
-    execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: ' + mode.toUpperCase() + '"', { shell: true, stdio: 'ignore' }); 
-  } catch (e) {
-    statusCircle = "🟡"; // Warning: Operational but Maestri failed
-    errorMsg = " [NO_MAESTRI]";
-  }
 
   let reinforcement = "";
   if (mode === "lite") {
