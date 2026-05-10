@@ -11,6 +11,7 @@ When user invokes /runes, manage compression mode.
   - Missing or \`off\` → activate at \`full\`.
   - Active → deactivate.
 - \`/runes [lite|full|ultra]\` → update to mode.
+- \`/runes-stats\` → show real token usage and savings.
 
 Use the shared core logic to read/write flags.
 
