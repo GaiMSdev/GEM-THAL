@@ -2,6 +2,15 @@
 const { readFlag, writeFlag, removeFlag } = require("./config");
 const { execSync } = require("child_process");
 
+const SMALL_CAPS = {
+  'G': 'ɢ', 'E': 'ᴇ', 'M': 'ᴍ', 'T': 'ᴛ', 'H': 'ʜ', 'A': 'ᴀ', 'L': 'ʟ',
+  'F': 'ꜰ', 'U': 'ᴜ', 'L': 'ʟ', 'I': 'ɪ', 'T': 'ᴛ', 'R': 'ʀ'
+};
+
+function toSmallCaps(str) {
+  return str.toUpperCase().split('').map(c => SMALL_CAPS[c] || c).join('');
+}
+
 let input = "";
 process.stdin.on("data", c => { input += c; });
 process.stdin.on("end", () => {
@@ -15,7 +24,7 @@ process.stdin.on("end", () => {
     removeFlag();
     // Silent Maestri update
     try { execSync('"$MAESTRI_CLI" note write "GEM-THAL-Status" "GEM-THAL: OFF"', { shell: true, stdio: 'ignore' }); } catch (e) {}
-    process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [GEM-THAL: OFF]" }));
+    process.stdout.write(JSON.stringify({ systemMessage: "⚪️ [" + toSmallCaps("GEM-THAL") + ": OFF]" }));
     process.exit(0);
   }
 
@@ -44,8 +53,10 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  // Symbol: 💠 (Gemini-diamant) + ⚡️ (Akselerasjon)
-  const statusLine = "💠⚡️ [GEM-THAL:" + mode.toUpperCase() + "]";
+  // Small caps conversion
+  const tag = toSmallCaps("GEM-THAL");
+  const modeLabel = toSmallCaps(mode);
+  const statusLine = "💠⚡️ [" + tag + ":" + modeLabel + "]";
   
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
