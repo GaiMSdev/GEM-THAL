@@ -44,8 +44,8 @@ process.stdin.on("end", () => {
     reinforcement = "COMPRESS FULL: Drop articles. Fragments OK. No pleasantries. High-signal.";
   }
 
-  // Pure text + emoji for clean look (CLI friendly)
-  const statusLine = "🟠 [GEM-THAL:" + mode.toUpperCase() + "]";
+  // Symbol: 💠 (Gemini-diamant) + ⚡️ (Akselerasjon)
+  const statusLine = "💠⚡️ [GEM-THAL:" + mode.toUpperCase() + "]";
   
   process.stdout.write(JSON.stringify({
     systemMessage: statusLine,
