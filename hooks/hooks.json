@@ -19,6 +19,17 @@
           }
         ]
       }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace|sed",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${extensionPath}/scripts/after-tool.js"
+          }
+        ]
+      }
     ]
   }
 }
