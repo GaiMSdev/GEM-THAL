@@ -17,7 +17,7 @@ Industry-leading semantic compression. High-signal output without accuracy loss.
 |------|--------|-------------|
 | `lite` | Drop filler. Keep detail. | ~35% |
 | `full` | Drop articles. Fragments OK. | ~75% |
-| `ultra`| MetaGlyphs + Data Packets. | **~88%** |
+| `ultra`| Prose abbrev + → causality. NOT→DO contrastive. | **~75%** |
 
 ### Commands
 

@@ -23,7 +23,7 @@ def compress_text(text):
     hedging = r'\b(sure|certainly|of course|happy to|i\'d recommend|it might be worth|you could consider)\b'
     text = re.sub(hedging, '', text, flags=re.IGNORECASE)
     
-    # 3. Short synonyms / MetaGlyphs logic
+    # 3. Short synonyms / prose abbreviation logic
     # (Simplified for regex-only version)
     replacements = {
         r'\bconfiguration\b': 'cfg',
