@@ -36,9 +36,9 @@ process.stdin.on("end", () => {
   }
 
   // Mode activation logic
-  const activateMatch = prompt.match(/\b(activate|enable|turn on|start|switch to)\b.*\b(compress|runes)\s*(lite|full|ultra)?\b/i) ||
-                        prompt.match(/\b(compress|runes)\s*(lite|full|ultra)?\b.*\b(on|activate|enable)\b/i) ||
-                        prompt.match(/\b(lite|full|ultra)\b.*\b(compress|runes)\b.*\bmode\b/i);
+  const activateMatch = prompt.match(/\b(activate|enable|turn on|start|switch to)\b.*\b(compress|runes)\s*(lite|full|ultra|hybrid)?\b/i) ||
+                        prompt.match(/\b(compress|runes)\s*(lite|full|ultra|hybrid)?\b.*\b(on|activate|enable)\b/i) ||
+                        prompt.match(/\b(lite|full|ultra|hybrid)\b.*\b(compress|runes)\b.*\bmode\b/i);
   if (activateMatch) {
     let newMode = activateMatch[3] || activateMatch[2] || "full";
     if (!core.VALID_MODES.includes(newMode)) newMode = "full";

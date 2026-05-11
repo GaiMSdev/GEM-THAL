@@ -9,7 +9,13 @@ const path = require('path');
 const os = require('os');
 
 const SCRIPTS = path.join(__dirname);
-const FLAG = path.join(os.homedir(), '.gemini', '.compress-active');
+const ROOT = path.join(SCRIPTS, '..');
+const TEST_CONFIG_DIR = path.join(os.tmpdir(), 'gem-thal-test-config');
+fs.rmSync(TEST_CONFIG_DIR, { recursive: true, force: true });
+fs.mkdirSync(TEST_CONFIG_DIR, { recursive: true });
+process.env.GEMINI_CONFIG_DIR = TEST_CONFIG_DIR;
+
+const FLAG = path.join(TEST_CONFIG_DIR, '.compress-active');
 const SESSION_START = path.join(SCRIPTS, 'session-start.js');
 const BEFORE_AGENT = path.join(SCRIPTS, 'before-agent.js');
 
@@ -52,7 +58,7 @@ function runScript(script, input = '') {
 // ── config.js ─────────────────────────────────────────────────────────────────
 console.log('\nconfig.js');
 const { readFlag: cfgRead, writeFlag: cfgWrite, removeFlag: cfgRemove } =
-    require(path.join(SCRIPTS, 'config'));
+    require(path.join(ROOT, 'lib', 'runes-core'));
 
 clearFlag();
 assert('readFlag returns null when no flag file', cfgRead() === null);
@@ -110,6 +116,8 @@ cfgWrite('ultra');
 const ultraSession = runScript(SESSION_START);
 assert('additionalContext contains COMPRESS ULTRA for ultra mode',
     ultraSession.json?.hookSpecificOutput?.additionalContext?.includes('COMPRESS ULTRA'));
+assert('ultra instructions do not contain CoD',
+    !ultraSession.json?.hookSpecificOutput?.additionalContext?.includes('CoD'));
 
 clearFlag();
 
@@ -146,6 +154,14 @@ clearFlag();
 const activateUltra = runScript(BEFORE_AGENT,
     JSON.stringify({ prompt: 'switch to compress ultra', hook_event_name: 'BeforeAgent' }));
 assert('activate compress ultra → writes ultra flag', readFlag() === 'ultra');
+
+// Activate hybrid
+clearFlag();
+const activateHybrid = runScript(BEFORE_AGENT,
+    JSON.stringify({ prompt: 'switch to compress hybrid', hook_event_name: 'BeforeAgent' }));
+assert('activate compress hybrid → writes hybrid flag', readFlag() === 'hybrid');
+assert('activate compress hybrid → reinforcement mentions COMPRESS HYBRID',
+    activateHybrid.json?.hookSpecificOutput?.additionalContext?.includes('COMPRESS HYBRID'));
 
 // Deactivate via "normal mode"
 cfgWrite('full');

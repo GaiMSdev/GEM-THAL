@@ -4,7 +4,9 @@
   "description": "Industry-leading token compression for Gemini, Claude, and OpenCode.",
   "main": "lib/runes-core.js",
   "scripts": {
-    "stats": "node scripts/stats.js"
+    "stats": "node scripts/stats.js",
+    "test": "node scripts/test.js",
+    "benchmark:hybrid": "python3 scripts/hybrid-benchmark.py"
   },
   "keywords": [
     "compression",
