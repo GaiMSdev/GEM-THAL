@@ -2,32 +2,16 @@
 
 High-signal compression for Gemini CLI.
 
-GEM-THAL is a Gemini CLI extension that injects compression rules into every model turn via hooks. Activate once — mode persists in a flag file at `~/.gemini/.compress-active` until you say "normal mode". Three levels of semantic compression, from light filler-removal to MetaGlyph data packets.
+GEM-THAL is a Gemini CLI extension that injects compression rules into every model turn via hooks. Activate once — mode persists in a flag file at `~/.gemini/.compress-active` until you say "normal mode". Four levels of compression, from light filler-removal to maximum-density prose.
 
 ## Modes
 
-| Mode | Description | Compression |
-|------|-------------|-------------|
-| `lite` | Drop filler. Keep all detail. | ~35% |
-| `full` | Drop articles. Fragments OK. | ~75% |
-| `ultra` | MetaGlyphs + `<R>Key:Value</R>` data packets. | ~88% |
-
-## MetaGlyphs (ultra mode)
-
-Ultra mode uses a fixed symbol vocabulary to replace verbose constructs:
-
-| Symbol | Meaning |
-|--------|---------|
-| `⌬` | module |
-| `⑂` | branch / fork |
-| `⨕` | transform |
-| `→` | causality / leads to |
-| `∴` | therefore |
-| `∵` | because |
-| `®` | requirement |
-| `⚙` | implementation |
-| `[!]` | error |
-| `[✓]` | success |
+| Mode | Description | Output reduction |
+|------|-------------|-----------------|
+| `lite` | Drop filler, hedging, pleasantries. Full sentences. | ~30% |
+| `full` | Drop articles. Fragments OK. Short synonyms. (default) | ~75% |
+| `ultra` | Abbreviated prose. Causality arrows. Strip conjunctions. | ~68% |
+| `wenyan` | Classical Chinese literary compression. Technical identifiers preserved. | — |
 
 ## Skills
 
@@ -37,6 +21,30 @@ Ultra mode uses a fixed symbol vocabulary to replace verbose constructs:
 | `runes-commit` | `/runes-commit` | Generate a Conventional Commits message from staged diff. No noise — subject + optional "why" body only. |
 | `runes-review` | `/runes-review` | Review staged diff. One finding per line, severity-tagged (`CRITICAL` / `WARN` / `NOTE`). Max 10. No praise. |
 | `runes-stats` | `/runes-stats` | Show real token usage and estimated savings for the session. |
+
+## Input compression (runes-shrink)
+
+`runes-shrink` is an MCP proxy that compresses tool and resource descriptions before
+the model sees them — reducing tool description char-count ~3–5% on typical corpora; savings compound across many tools.
+
+Wrap any MCP server in your Gemini CLI config:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "/Users/robert/.gemini/extensions/gem-thal/mcp-shrink/index.js",
+        "npx", "@modelcontextprotocol/server-filesystem", "/your/path"
+      ]
+    }
+  }
+}
+```
+
+Code, URLs, paths, and identifiers are never touched. Only prose descriptions are compressed.
+Debug: `RUNES_SHRINK_DEBUG=1`. Extra fields: `RUNES_SHRINK_FIELDS=description,title`.
 
 ## Installation
 
